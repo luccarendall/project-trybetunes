@@ -3,7 +3,9 @@ import React from 'react';
 class ProfileEdit extends React.Component {
   render() {
     return (
-      <p>Profile Edit</p>
+      <div data-testid="page-profile-edit">
+        <p>Profile Edit</p>
+      </div>
     );
   }
 }

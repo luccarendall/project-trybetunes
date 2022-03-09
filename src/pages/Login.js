@@ -3,7 +3,9 @@ import React from 'react';
 class Login extends React.Component {
   render() {
     return (
-      <p>Login</p>
+      <div data-testid="page-login">
+        <p>Login</p>
+      </div>
     );
   }
 }

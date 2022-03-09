@@ -1,9 +1,13 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 class NotFound extends React.Component {
   render() {
     return (
-      <p>Error 404: Not Found</p>
+      <div data-testid="page-not-found">
+        <h1>404 - Not Found!</h1>
+        <Link to="/">Voltar</Link>
+      </div>
     );
   }
 }
