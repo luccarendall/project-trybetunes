@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+// import { createUser } from './services/userAPI';
 import Login from './pages/Login';
 import Search from './pages/Search';
 import Album from './pages/Album';
