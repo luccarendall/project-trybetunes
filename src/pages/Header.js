@@ -36,9 +36,9 @@ class Header extends React.Component {
           <>
             <header data-testid="header-component">
               <p data-testid="header-user-name">
-                {' '}
+                {'Olá, '}
                 {userName}
-                {' '}
+                {''}
               </p>
             </header>
             <div>
