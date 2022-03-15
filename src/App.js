@@ -13,8 +13,6 @@ import NotFound from './pages/NotFound';
 class App extends React.Component {
   render() {
     return (
-      // Referência criação de rotas com BrowserRouter: youtube.com/watch?v=9pB_lwmLc74
-      // Referência para erro 404: ultimatecourses.com/blog/react-router-not-found-component
       <Router>
         <div className="App">
           <p>TrybeTunes</p>
@@ -28,9 +26,7 @@ class App extends React.Component {
             <Route component={ NotFound } />
           </Switch>
         </div>
-      </Router>
-    );
+      </Router>);
   }
 }
-
 export default App;

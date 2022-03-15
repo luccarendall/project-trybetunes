@@ -17,3 +17,12 @@ code {
   display: flex;
   justify-content: center;
 }
+
+input {
+  width: 14rem;
+}
+
+.link {
+  color: blue 
+}
+

@@ -1,53 +1,73 @@
 import React from 'react';
-import propTypes from 'prop-types';
-// import Loading from './Loading';
+import { Redirect } from 'react-router-dom';
+import { createUser } from '../services/userAPI';
+import Loading from './Loading';
+
+const magicNumber = 3;
 
 class Login extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      disabled: true,
+      name: '',
+      loading: false,
+      redirect: false,
+    };
+  }
+
+  loginInputChange = (event) => {
+    this.setState({
+      name: event.target.value,
+    }, () => {
+      this.setState((prev) => ({
+        disabled: prev.name.length < magicNumber,
+      }));
+    });
+  }
+
+  activatedBtn = async () => {
+    const { name } = this.state;
+    this.setState({
+      loading: true,
+    });
+    await createUser({ name });
+    this.setState({
+      redirect: true,
+      loading: false,
+    });
+  }
+
   render() {
-    const {
-      loginInput,
-      LoginBtnDisabled,
-      loginInputChange,
-      // validationLogin,
-    } = this.props;
-
-    // validationLogin = () => {
-    //   if (loginInput.length >= 3) {
-    //     LoginBtn;
-    //   }
-    // };
-
+    const { name, disabled, loading, redirect } = this.state;
     return (
-      <div data-testid="page-login">
-        <p>Login</p>
+      loading
+        ? <Loading /> : (
+          <div data-testid="page-login">
+            <p>Login</p>
 
-        <input
-          type="text"
-          data-testid="login-name-input"
-          value={ loginInput }
-          onChange={ loginInputChange }
-        />
+            <input
+              type="text"
+              data-testid="login-name-input"
+              value={ name }
+              onChange={ this.loginInputChange }
+            />
+            {redirect ? <Redirect to="/search" /> : null}
+            <button
+              type="button"
+              data-testid="login-submit-button"
+              disabled={ disabled }
+              onClick={ this.activatedBtn }
+            >
+              Entrar
 
-        <button
-          type="button"
-          data-testid="login-submit-button"
-          disabled={ LoginBtnDisabled }
-        >
-          Entrar
-
-        </button>
-      </div>
+            </button>
+          </div>
+        )
+        // : <Loading />
     );
+    // { redirect ? <Redirect to="/search" /> : null; }
   }
 }
 
-Login.propTypes = {
-  // validationLogin: propTypes.func.isRequired,
-  loginInput: propTypes.string.isRequired,
-  loginInputChange: propTypes.func.isRequired,
-  LoginBtnDisabled: propTypes.bool.isRequired,
-}; // Não sei pq não tá pegando o isRequired só no final
-
 export default Login;
-
-// capturar o input de texto e o botão e se o value do input de texto tiver 3 ou mais caracteres aceitar o click com a função createUser
