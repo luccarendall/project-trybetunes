@@ -15,7 +15,7 @@ class Album extends React.Component {
       loading: false,
       favMusics: [],
     };
-    this.onChangeFavs = this.onChangeFavs.bind(this);
+    this.onChangeFavorite = this.onChangeFavorite.bind(this);
     this.favSong = this.favSong.bind(this);
   }
 
@@ -31,7 +31,7 @@ class Album extends React.Component {
     });
   }
 
-  onChangeFavs({ event, music }) {
+  onChangeFavorite({ event, music }) {
     const { checked } = event.target;
 
     this.setState({ loading: true }, async () => {
@@ -71,7 +71,7 @@ class Album extends React.Component {
             key={ music.trackId }
             music={ music }
             isFavorite={ !!this.favSong(music) }
-            onChangeFavs={ this.onChangeFavs }
+            onChangeFavorite={ this.onChangeFavorite }
           />))}
         </div>
       </>
