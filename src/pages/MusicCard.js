@@ -12,7 +12,6 @@ class MusicCard extends React.Component {
           <track kind="captions" />
           O seu navegador não suporta o elemento
           <code>audio</code>
-          .
         </audio>
 
         <label htmlFor="favorite-checkbox">
@@ -20,9 +19,7 @@ class MusicCard extends React.Component {
           <input
             id="favorite-checkbox"
             type="checkbox"
-
             data-testid={ `checkbox-music-${trackId}` }
-
             onChange={ (event) => onChangeFavorite({ event, music }) }
             checked={ isFavorite }
           />
