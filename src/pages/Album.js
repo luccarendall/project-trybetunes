@@ -13,46 +13,46 @@ class Album extends React.Component {
       musics: [],
       album: {},
       loading: false,
-      favoriteMusics: [],
+      favMusics: [],
     };
-    this.onChangeFavorite = this.onChangeFavorite.bind(this);
-    this.isMusicFavorite = this.isMusicFavorite.bind(this);
+    this.onChangeFavs = this.onChangeFavs.bind(this);
+    this.favSong = this.favSong.bind(this);
   }
 
   componentDidMount() {
     const { match } = this.props;
     const { id } = match.params;
     this.setState({ loading: true }, async () => {
-      const favoriteMusics = await getFavoriteSongs();
+      const favMusics = await getFavoriteSongs();
       const results = await getMusics(id);
       const album = results[0];
       const musics = results.filter((result) => result.kind === 'song');
-      this.setState({ musics, album, favoriteMusics, loading: false });
+      this.setState({ musics, album, favMusics, loading: false });
     });
   }
 
-  onChangeFavorite({ event, music }) {
+  onChangeFavs({ event, music }) {
     const { checked } = event.target;
 
     this.setState({ loading: true }, async () => {
-      const { favoriteMusics } = this.state;
+      const { favMusics } = this.state;
       if (checked) {
         await addSong(music);
-        favoriteMusics.push(music);
-        this.setState({ loading: false, favoriteMusics });
+        favMusics.push(music);
+        this.setState({ loading: false, favMusics });
       } else {
         await removeSong(music);
-        const filterFavorites = favoriteMusics.filter(
+        const filterFavorites = favMusics.filter(
           (favoriteMusic) => favoriteMusic.trackId !== music.trackId,
         );
-        this.setState({ loading: false, favoriteMusics: filterFavorites });
+        this.setState({ loading: false, favMusics: filterFavorites });
       }
     });
   }
 
-  isMusicFavorite(music) {
-    const { favoriteMusics = [] } = this.state;
-    return favoriteMusics.find(
+  favSong(music) {
+    const { favMusics = [] } = this.state;
+    return favMusics.find(
       (favoriteMusic) => music.trackId === favoriteMusic.trackId,
     );
   }
@@ -70,8 +70,8 @@ class Album extends React.Component {
           {musics.map((music) => (<MusicCard
             key={ music.trackId }
             music={ music }
-            isFavorite={ !!this.isMusicFavorite(music) }
-            onChangeFavorite={ this.onChangeFavorite }
+            isFavorite={ !!this.favSong(music) }
+            onChangeFavs={ this.onChangeFavs }
           />))}
         </div>
       </>
