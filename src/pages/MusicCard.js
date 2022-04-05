@@ -1,10 +1,10 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropType from 'prop-types';
 import { addSong, getFavoriteSongs, removeSong } from '../services/favoriteSongsAPI';
 
-class MusicCard extends Component {
-  constructor(props) {
-    super(props);
+class MusicCard extends React.Component {
+  constructor() {
+    super();
     this.state = {
       loading: false,
       Checked: false,
