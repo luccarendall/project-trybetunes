@@ -1,55 +1,55 @@
 import React from 'react';
 import Header from './Header';
-import { getFavoriteSongs } from '../services/favoriteSongsAPI';
+import { getFavoriteSongs, removeSong } from '../services/favoriteSongsAPI';
+import Loading from './Loading';
 import MusicCard from './MusicCard';
 
-export default class Favorites extends React.Component {
-  constructor() {
-    super();
+class Favorites extends React.Component {
+  constructor(props) {
+    super(props);
+
     this.state = {
-      isLoading: true,
-      favorites: [],
+      loading: false,
+      favoriteMusics: [],
     };
+    this.onRemoveFavorite = this.onRemoveFavorite.bind(this);
   }
 
   componentDidMount() {
-    this.favorites();
+    this.setState({ loading: true }, async () => {
+      const favoriteMusics = await getFavoriteSongs();
+
+      this.setState({ favoriteMusics, loading: false });
+    });
   }
 
-  favorites = async () => {
-    const favSongs = await getFavoriteSongs();
-    this.setState({ favorites: favSongs, isLoading: false });
+  onRemoveFavorite({ music }) {
+    this.setState({ loading: true }, async () => {
+      await removeSong(music);
+      const favoriteMusics = await getFavoriteSongs();
+
+      this.setState({ loading: false, favoriteMusics });
+    });
   }
 
-  removeMusic = (track) => {
-    this.setState({ isLoading: true });
-    const { favorites } = this.state;
-    const filteredMusics = favorites.filter((music) => music !== track);
-    this.setState({ favorites: filteredMusics, isLoading: false });
-  }
-
-  renderSongs = () => {
-    const { favorites } = this.state;
-    return (
-      <section>
-        {favorites.map((music) => (
-          <section key={ music.trackName }>
-            <MusicCard track={ music } removeMusic={ this.removeMusic } />
-          </section>
-        ))}
-      </section>
-    );
+  renderFavoriteMusics() {
+    const { favoriteMusics } = this.state;
+    return favoriteMusics.map((favoriteMusic) => (<MusicCard
+      key={ favoriteMusic.trackId }
+      music={ favoriteMusic }
+      isFavorite
+      onChangeFavorite={ this.onRemoveFavorite }
+    />));
   }
 
   render() {
-    const { isLoading } = this.state;
+    const { loading } = this.state;
     return (
       <div data-testid="page-favorites">
         <Header />
-        {isLoading
-          ? <p>Carregando...</p>
-          : this.renderSongs()}
+        { loading ? <Loading /> : this.renderFavoriteMusics()}
       </div>
     );
   }
 }
+export default Favorites;

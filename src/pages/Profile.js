@@ -4,11 +4,11 @@ import Header from './Header';
 import { getUser } from '../services/userAPI';
 
 export default class Profile extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       isLoading: true,
-      user: undefined,
+      user: '',
     };
   }
 
@@ -21,11 +21,11 @@ export default class Profile extends React.Component {
     this.setState({ user, isLoading: false });
   }
 
-  renderUserInfo = () => {
+  userInfos = () => {
     const { user } = this.state;
     return (
       <section>
-        <h2>{user.name}</h2>
+        <h3>{user.name}</h3>
         <p>{user.email}</p>
         <p>{user.description}</p>
         <img src={ user.image } alt={ user.name } data-testid="profile-image" />
@@ -43,7 +43,7 @@ export default class Profile extends React.Component {
         <Header />
         {isLoading
           ? <p>Carregando...</p>
-          : this.renderUserInfo()}
+          : this.userInfos()}
       </div>
     );
   }

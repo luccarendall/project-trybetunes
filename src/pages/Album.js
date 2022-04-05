@@ -1,74 +1,98 @@
-import React, { Component } from 'react';
-import PropType from 'prop-types';
+import React from 'react';
+import PropTypes from 'prop-types';
 import Header from './Header';
-import MusicCard from './MusicCard';
 import getMusics from '../services/musicsAPI';
+import MusicCard from './MusicCard';
+import Loading from './Loading';
+import { addSong, getFavoriteSongs, removeSong } from '../services/favoriteSongsAPI';
 
-class Album extends Component {
-  constructor() {
-    super();
+class Album extends React.Component {
+  constructor(props) {
+    super(props);
     this.state = {
       musics: [],
-      collection: undefined,
+      album: {},
+      loading: false,
+      favoriteMusics: [],
     };
+    this.onChangeFavorite = this.onChangeFavorite.bind(this);
+    this.isMusicFavorite = this.isMusicFavorite.bind(this);
   }
 
   componentDidMount() {
-    const { match: { params: { id } } } = this.props;
-    this.handlerAPI(id);
+    const { match } = this.props;
+    const { id } = match.params;
+    this.setState({ loading: true }, async () => {
+      const favoriteMusics = await getFavoriteSongs();
+      const results = await getMusics(id);
+      const album = results[0];
+      const musics = results.filter((result) => result.kind === 'song');
+      this.setState({ musics, album, favoriteMusics, loading: false });
+    });
   }
 
-  componentDidUpdate() {
-    const { musics } = this.state;
-    if (musics.length > 0) {
-      this.musicRender();
-    }
+  onChangeFavorite({ event, music }) {
+    const { checked } = event.target;
+
+    this.setState({ loading: true }, async () => {
+      const { favoriteMusics } = this.state;
+      if (checked) {
+        await addSong(music);
+        favoriteMusics.push(music);
+        this.setState({ loading: false, favoriteMusics });
+      } else {
+        await removeSong(music);
+        const filterFavorites = favoriteMusics.filter(
+          (favoriteMusic) => favoriteMusic.trackId !== music.trackId,
+        );
+        this.setState({ loading: false, favoriteMusics: filterFavorites });
+      }
+    });
   }
 
-  handlerAPI = async (id) => {
-    const getMusic = await getMusics(id);
-    const musicList = getMusic.filter((elem) => elem.kind === 'song');
-    this.setState({ collection: getMusic[0] });
-    this.setState({ musics: [...musicList] });
+  isMusicFavorite(music) {
+    const { favoriteMusics = [] } = this.state;
+    return favoriteMusics.find(
+      (favoriteMusic) => music.trackId === favoriteMusic.trackId,
+    );
   }
 
-  musicRender = () => {
-    const { musics, collection } = this.state;
+  renderMusics() {
+    const { album, musics } = this.state;
     return (
-      <section>
-        <h3 data-testid="artist-name">{collection.artistName}</h3>
-        <h4 data-testid="album-name">{collection.collectionName}</h4>
-        <img src={ collection.artworkUrl100 } alt={ collection.collectionName } />
-        {musics.map((track) => (
-          <section
-            key={ track.trackName }
-          >
-            <MusicCard track={ track } />
-          </section>
-        ))}
-      </section>
+      <>
+        <div>
+          <img src={ album.artworkUrl100 } alt="imagem do album" />
+          <h2 data-testid="album-name">{ album.collectionName }</h2>
+          <p data-testid="artist-name">{ album.artistName }</p>
+        </div>
+        <div>
+          {musics.map((music) => (<MusicCard
+            key={ music.trackId }
+            music={ music }
+            isFavorite={ !!this.isMusicFavorite(music) }
+            onChangeFavorite={ this.onChangeFavorite }
+          />))}
+        </div>
+      </>
     );
   }
 
   render() {
-    const { musics } = this.state;
+    const { loading } = this.state;
     return (
       <div data-testid="page-album">
         <Header />
-        <main>
-          {musics.length === 0 ? <p>Carregando...</p> : this.musicRender()}
-        </main>
+        { loading ? <Loading /> : this.renderMusics()}
       </div>
     );
   }
 }
-
 Album.propTypes = {
-  match: PropType.shape({
-    params: PropType.shape({
-      id: PropType.string,
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      id: PropTypes.string.isRequired,
     }),
-  }).isRequired,
-};
-
+  }),
+}.isRequired;
 export default Album;
