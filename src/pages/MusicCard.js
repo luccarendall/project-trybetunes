@@ -1,50 +1,99 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import Loading from './Loading';
+import React, { Component } from 'react';
+import PropType from 'prop-types';
+import { addSong, getFavoriteSongs, removeSong } from '../services/favoriteSongsAPI';
 
-class MusicCard extends React.Component {
-  constructor() {
-    super();
+class MusicCard extends Component {
+  constructor(props) {
+    super(props);
     this.state = {
       loading: false,
-      chosenong: [],
+      Checked: false,
+      favoriteSongs: [],
     };
   }
 
+  componentDidMount() {
+    this.handlerFavoriteSong();
+  }
+
+  handlerFavoriteSong = async () => {
+    this.setState({ loading: true });
+    const savedSong = await getFavoriteSongs();
+    this.setState({ loading: false, favoriteSongs: savedSong });
+    const { favoriteSongs } = this.state;
+    const { track } = this.props;
+    const favorites = favoriteSongs.find((music) => (
+      music.trackName.includes(track.trackName)
+    ));
+    if (favorites) {
+      this.setState({ Checked: true });
+    }
+  }
+
+  addFavoriteSong = async () => {
+    this.setState({ loading: true });
+    const { track } = this.props;
+    await addSong(track);
+    this.setState({ loading: false, Checked: true });
+  }
+
+  removeFavoriteMusic = async () => {
+    const { removeMusic, track } = this.props;
+    this.setState({ loading: true });
+    await removeSong(track);
+    if (typeof removeMusic === 'function') removeMusic(track);
+    this.setState({ loading: false, Checked: false });
+  }
+
+  handleChange = (event) => {
+    const { target: { checked } } = event;
+    if (checked) {
+      this.addFavoriteSong();
+    } else {
+      this.removeFavoriteMusic();
+    }
+  }
+
   render() {
-    const { musicLibrary } = this.props;
-    const { loading, chosenong } = this.state;
+    const { track: { trackName, previewUrl, trackId } } = this.props;
+    const { loading, Checked } = this.state;
     return (
       <div>
-        {loading ? <Loading /> // método de renderização do loading diferente
+        {loading
+          ? <p>Carregando...</p>
           : (
-            musicLibrary.filter((item) => item.trackName)
-              .map((music) => (
-                <div key={ music.trackId }>
-                  <p>{music.trackName}</p>
-                  <audio data-testid="audio-component" src={ music.previewUrl } controls>
-                    <track kind="captions" />
-                    O seu navegador não suporta o elemento
-                  </audio>
-                  <label htmlFor={ music.trackId }>
-                    Favorita
-                    <input
-                      type="checkbox"
-                      data-testid={ `checkbox-music-${music.trackId}` }
-                      value={ music.trackId }
-                      id={ music.trackId }
-                      checked={ chosenong.some((id) => +id.trackId === music.trackId) }
-                    />
-                  </label>
-                </div>
-              )))}
+            <section>
+              <h4>{trackName}</h4>
+              <audio data-testid="audio-component" src={ previewUrl } controls>
+                <track kind="captions" />
+              </audio>
+              <label htmlFor="favorites">
+                Favoritos!
+                <input
+                  id="favorites"
+                  type="checkbox"
+                  checked={ Checked }
+                  data-testid={ `checkbox-music-${trackId}` }
+                  onChange={
+                    (event) => { this.handleChange(event); }
+                  }
+                />
+              </label>
+            </section>
+          )}
       </div>
+
     );
   }
 }
 
 MusicCard.propTypes = {
-  musicLibrary: PropTypes.arrayOf(PropTypes.object),
-}.isRequired;
+  track: PropType.shape({
+    trackName: PropType.string,
+    previewUrl: PropType.string,
+    trackId: PropType.number,
+  }),
+  removeMusic: PropType.func,
+}.Required;
 
 export default MusicCard;
